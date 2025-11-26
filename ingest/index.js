@@ -1,5 +1,7 @@
 import { Inngest } from "inngest";
 import User from "../models/user.js";
+import sendEmail from "../configs/nodeMailer.js";
+import Connection from "../models/Connection.js";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "amorzinho" });
@@ -57,10 +59,58 @@ const syncUserDeletion = inngest.createFunction(
     }
 )
 
+const sendNewConnectionRequestReminder = inngest.createFunction(
+    { id: "send-connection-request-reminder" },
+    { event: "app/connection-request" },
+    async ({ event, step }) => {
+        // Function logic goes here
+        const { connectionId } = event.data;
+
+        await step.run('send-connection-request-mail', async () => {
+            const connection = await Connection.findById(connectionId).populate(connectionId).populate('from_user_id to_user_id');
+            const subject = "You have a new connection request";
+            const text = `<p>Hi ${connection.to_user_id.full_name},</p>
+            <p>You have a new connection request from ${connection.from_user_id.full_name}.</p>
+            <p>Please log in to your account to accept or decline the request.</p>
+            <p>Best regards,<br/>Amorzinho Team</p>`;
+
+            await sendEmail({
+                to: connection.to_user_id.email,
+                subject,
+                text
+            })
+        });
+
+        const in24Hours = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await step.sleepUntil("wait-for-24-hours", in24Hours);
+        await step.run('send-connection-request-reminder', async () => {
+            const connection = await Connection.findById(connectionId).populate('from_user_id to_user_id');
+            if (connection.status === 'accepted') {
+                return { message: "Connection request already accepted" };
+            }
+
+            const subject = "You have a new connection request";
+            const text = `<p>Hi ${connection.to_user_id.full_name},</p>
+            <p>You have a new connection request from ${connection.from_user_id.full_name}.</p>
+            <p>Please log in to your account to accept or decline the request.</p>
+            <p>Best regards,<br/>Amorzinho Team</p>`;
+
+            await sendEmail({
+                to: connection.to_user_id.email,
+                subject,
+                text
+            })
+
+            return { message: "Reminder email sent successfully" };
+
+        })
+    }
+)
 
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
     syncUserCreation,
     syncUserUpdation,
-    syncUserDeletion
+    syncUserDeletion,
+    sendNewConnectionRequestReminder
 ];
