@@ -26,10 +26,10 @@ router.post('/register', async (req, res) => {
 
     // Check if user exists
     const userExists = await User.findOne({ $or: [{ email }, { username }] });
-    
+
     if (userExists) {
-      return res.status(400).json({ 
-        message: userExists.email === email ? 'Email already registered' : 'Username already taken' 
+      return res.status(400).json({
+        message: userExists.email === email ? 'Email already registered' : 'Username already taken'
       });
     }
 
@@ -49,8 +49,11 @@ router.post('/register', async (req, res) => {
       });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error during registration' });
+    console.error('Registration error:', error);
+    res.status(500).json({
+      message: 'Server error during registration',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -80,8 +83,11 @@ router.post('/login', async (req, res) => {
       res.status(401).json({ message: 'Invalid email or password' });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error during login' });
+    console.error('Login error:', error);
+    res.status(500).json({
+      message: 'Server error during login',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
