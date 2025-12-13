@@ -1,0 +1,32 @@
+{
+    "name": "dsa-master-backend",
+    "version": "1.0.0",
+    "description": "Backend API for DSA Master - Problem Tracker",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js",
+        "server": "nodemon index.js"
+    },
+    "keywords": [
+        "dsa",
+        "leetcode",
+        "tracker",
+        "api"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "bcryptjs": "^3.0.3",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.5",
+        "dotenv": "^17.2.3",
+        "express": "^5.2.1",
+        "jsonwebtoken": "^9.0.3",
+        "mongoose": "^9.0.1"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.2"
+    }
+}
