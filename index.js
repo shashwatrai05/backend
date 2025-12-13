@@ -9,8 +9,16 @@ dotenv.config();
 
 const app = express();
 
-// Connect to MongoDB (async, don't block)
-connectDB().catch(err => console.error('MongoDB connection error:', err));
+// Middleware to ensure DB connection
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    res.status(503).json({ message: 'Database connection failed' });
+  }
+});
 
 // CORS Configuration - Allow all origins
 const corsOptions = {
