@@ -21,6 +21,19 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/progress', progressRoutes);
 
+// Root route - Server status
+app.get('/', (req, res) => {
+  res.json({
+    message: '🚀 DSA Tracker API Server is running!',
+    status: 'active',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      progress: '/api/progress'
+    }
+  });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ message: 'Server is running' });
